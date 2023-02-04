@@ -1,4 +1,12 @@
 from tkinter import *
+from enum import Enum
+
+
+class Season(Enum):
+    SPRING = 1
+    SUMMER = 2
+    AUTUMN = 3
+    WINTER = 4
 
 
 class Tiles(Frame):
@@ -19,6 +27,7 @@ class Tiles(Frame):
             file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\VaccumDirty.png")
         # ===================================================
 
+        # Generate Tiles======================================
         self.tiles = []
         i = 0
         for x in range(10):
@@ -28,6 +37,7 @@ class Tiles(Frame):
                 self.tiles[i].grid(column=x, row=y, sticky="news")
                 self.tiles[i].image = self.Tile_Clean
                 i += 1
+        # =====================================================
 
     def changeTileState(self, i):
         if (self.tiles[i]['text'] == "clean"):
