@@ -1,23 +1,29 @@
 import tkinter as tk
 import TileFrame
+import Navbar
 
 window = tk.Tk()
 window.geometry("1500x800")
-window.rowconfigure(0, weight=1)
-window.columnconfigure(0, weight=1)
-window.columnconfigure(1, weight=3)
 
+window.configure(bg="#112139")
 
 # Assets============================================
 Tile_Clean = tk.PhotoImage(
     file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\ScaledTile.png")
+# ===================================================
 
+# navbar frame======================================
+navbar = Navbar.NavbarFrame(window)
+navbar.pack(side="left", fill="y")
 
-# navbar frame=====================================
-navbar = tk.Frame(window, bg="red")
-navbar.grid(row=0, column=0, sticky="news")
+# tile frame========================================
+body = tk.Frame(window)
+body.rowconfigure(0, weight=1)
+body.columnconfigure(0, weight=1)
+body.pack(side="right", fill="both", expand="true")
 
-tileWindow = TileFrame.Tiles(window)
-tileWindow.grid(row=0, column=1, sticky="news", padx=10, pady=10)
+tileWindow = TileFrame.Tiles(body)
+tileWindow.grid(row=0, column=0, sticky="news", padx=10, pady=10)
+
 
 window.mainloop()
