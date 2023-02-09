@@ -20,8 +20,9 @@ body.rowconfigure(0, weight=1)
 body.columnconfigure(0, weight=1)
 body.pack(side="right", fill="both", expand="true")
 
-tileWindow = TileFrame.Tiles(body)
+tileWindow = TileFrame.Tiles(body, navbar)
 tileWindow.grid(row=0, column=0, sticky="news", padx=PADDING, pady=PADDING)
+# ==================================================
 
 
 window.mainloop()

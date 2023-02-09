@@ -1,4 +1,5 @@
 from tkinter import *
+import TileFrame
 
 
 class NavbarFrame(Frame):
@@ -10,18 +11,27 @@ class NavbarFrame(Frame):
         self.columnconfigure(0, weight=1)
 
         # Tool Menu===============================================
-        options_list = ["Clean/Dirty tool", "Option 2"]
-        value_inside = StringVar(self)
-        value_inside.set("Cursor Tools")
+        self.options_list = ["Clean/Dirty tool", "Option 2"]
+        self.value_inside = StringVar(self)
+        self.value_inside.set("Cursor Tools")
 
-        toolMenu = OptionMenu(self, value_inside, *options_list)
-        toolMenu.configure(font=('Calisto MT', 18),
-                           bg="#222831", fg="white", border=0, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
-        toolMenu.grid(row=0, column=0, sticky=E+W, padx=10)
+        self.toolMenu = OptionMenu(self, self.value_inside, *
+                                   self.options_list, command=self.setCursorMode)
+        self.toolMenu.configure(font=('Calisto MT', 18),
+                                bg="#222831", fg="white", border=0, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
+        self.toolMenu.grid(row=0, column=0, sticky=E+W, padx=10)
+
+        self.cursorMode = "Null"
         # ========================================================
 
         # Start Button===========================================
-        startButton = Button(self, text="Start",
-                             font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15)
-        startButton.grid(row=10, column=0, sticky=E+W, padx=10, pady=10)
+        self.startButton = Button(self, text="Start",
+                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15)
+        self.startButton.grid(row=10, column=0, sticky=E+W, padx=10, pady=10)
         # =======================================================
+
+    def getCursorMode(self):
+        return self.cursorMode
+
+    def setCursorMode(self, value):
+        self.cursorMode = value
