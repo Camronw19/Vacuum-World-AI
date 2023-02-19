@@ -7,7 +7,7 @@ PADDING = 3
 # ===================================================
 
 window = tk.Tk()
-window.geometry("1600x700")
+window.geometry("650x400")
 window.configure(bg="black")
 
 # navbar frame======================================
@@ -24,5 +24,6 @@ tileWindow = TileFrame.Tiles(body, navbar)
 tileWindow.grid(row=0, column=0, sticky="news", padx=PADDING, pady=PADDING)
 # ==================================================
 
+tileWindow.dfs()
 
 window.mainloop()

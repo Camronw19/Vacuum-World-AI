@@ -11,7 +11,7 @@ class NavbarFrame(Frame):
         self.columnconfigure(0, weight=1)
 
         # Tool Menu===============================================
-        self.options_list = ["Clean/Dirty tool", "Option 2"]
+        self.options_list = ["Clean/Dirty tool", "Wall tool", "Vacuum tool"]
         self.value_inside = StringVar(self)
         self.value_inside.set("Cursor Tools")
 
@@ -26,8 +26,10 @@ class NavbarFrame(Frame):
 
         # Start Button===========================================
         self.startButton = Button(self, text="Start",
-                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15)
+                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15, command=self.startAlgorithm)
         self.startButton.grid(row=10, column=0, sticky=E+W, padx=10, pady=10)
+
+        self.start = False
         # =======================================================
 
     def getCursorMode(self):
@@ -35,3 +37,9 @@ class NavbarFrame(Frame):
 
     def setCursorMode(self, value):
         self.cursorMode = value
+
+    def startAlgorithm(self):
+        self.start = True
+
+    def getStart(self):
+        return self.start
