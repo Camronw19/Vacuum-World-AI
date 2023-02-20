@@ -18,13 +18,16 @@ class Tiles(Frame):
         self.ROWS = 3
         self.COLS = 3
         self.graph = defaultdict(list)
+
         self.columnconfigure(tuple(range(self.ROWS)), weight=1)
         self.rowconfigure(tuple(range(self.COLS)), weight=1)
 
         self.cursorMode = CursorMode.NO_STATE
 
         self.controller = control
+        self.lock = False
         self.VacuumTile = 0
+        self.dirtTile = 7
         # Assets============================================
         self.Tile_Clean = PhotoImage(
             file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\TileClean.png")
@@ -45,14 +48,14 @@ class Tiles(Frame):
             for y in range(self.COLS):
                 self.tiles.append(
                     Button(self,  image=self.Tile_Clean, text="clean", font=('Arial', 18),  bg="#eeeee4", borderwidth=1, command=lambda x=i: self.changeTileState(x)))
-                self.tiles[i].grid(column=x, row=y, sticky="news")
+                self.tiles[i].grid(column=y, row=x, sticky="news")
                 self.tiles[i].image = self.Tile_Clean
                 i += 1
-        self.tiles[0]['image'] = self.Vacuum_Clean
-        self.tiles[0]['text'] = "vacuum"
+        self.tiles[self.VacuumTile]['image'] = self.Vacuum_Clean
+        self.tiles[self.VacuumTile]['text'] = "vacuum"
 
-        self.tiles[7]['image'] = self.Tile_Dirty
-        self.tiles[7]['text'] = "dirty"
+        self.tiles[self.dirtTile]['image'] = self.Tile_Dirty
+        self.tiles[self.dirtTile]['text'] = "dirty"
         # ====================================================
 
         # generate search graph================================
@@ -102,51 +105,104 @@ class Tiles(Frame):
             self.cursorMode = CursorMode.V_STATE
 
     def changeTileState(self, i):
-        # changes tiles from clean to dirty and vice versa
         self.setCursorMode()
-        if (self.cursorMode == CursorMode.C_D_State):
-            if (self.tiles[i]['text'] == "clean"):
-                self.tiles[i]['text'] = "dirty"
-                self.tiles[i]['image'] = self.Tile_Dirty
-            elif (self.tiles[i]['text'] == "dirty"):
-                self.tiles[i]['text'] = "clean"
-                self.tiles[i]['image'] = self.Tile_Clean
-        elif (self.cursorMode == CursorMode.V_STATE):  # changes the location of the vacuum
-            if (self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "wall"):
-                self.tiles[i]['text'] = "vacuum"
-                self.tiles[i]['image'] = self.Vacuum_Clean
-                self.tiles[self.VacuumTile]['image'] = self.Tile_Clean
-                self.tiles[self.VacuumTile]['text'] = "clean"
-                self.VacuumTile = i
-        elif (self.cursorMode == CursorMode.W_STATE):  # changes tiles into walls and vice verca
-            if (self.tiles[i]['text'] != "wall" and self.tiles[i]['text'] != "vacuum"):
-                self.tiles[i]['text'] = "wall"
-                self.tiles[i]['image'] = self.Wall
-            elif (self.tiles[i]['text'] != "vacuum"):
-                self.tiles[i]['text'] = "clean"
-                self.tiles[i]['image'] = self.Tile_Clean
+        if (self.lock == False):
+            if (self.cursorMode == CursorMode.C_D_State):  # changes the location of the dirty tile
+                if (self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "wall" and self.tiles[i]['text'] != "dirty"):
+                    self.tiles[i]['text'] = "dirty"
+                    self.tiles[i]['image'] = self.Tile_Dirty
+                    if self.dirtTile != -1:
+                        self.tiles[self.dirtTile]['image'] = self.Tile_Clean
+                        self.tiles[self.dirtTile]['text'] = "clean"
+                    self.dirtTile = i
+            elif (self.cursorMode == CursorMode.V_STATE):  # changes the location of the vacuum
+                if (self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "wall" and self.tiles[i]['text'] != "dirty"):
+                    self.tiles[i]['text'] = "vacuum"
+                    self.tiles[i]['image'] = self.Vacuum_Clean
+                    self.tiles[self.VacuumTile]['image'] = self.Tile_Clean
+                    self.tiles[self.VacuumTile]['text'] = "clean"
+                    self.VacuumTile = i
+            # changes tiles into walls and vice verca
+            elif (self.cursorMode == CursorMode.W_STATE):
+                if (self.tiles[i]['text'] != "wall" and self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "dirty"):
+                    self.tiles[i]['text'] = "wall"
+                    self.tiles[i]['image'] = self.Wall
+                elif (self.tiles[i]['text'] != "vacuum"):
+                    self.tiles[i]['text'] = "clean"
+                    self.tiles[i]['image'] = self.Tile_Clean
 
     def dfs(self):
+        self.lock = True
         visitedTiles = set()
         path = []
         tos = self.VacuumTile
         path.append(self.VacuumTile)
         visitedTiles.add(self.VacuumTile)
 
-        while path.count != 0 and tos != 8:
-            print(self.tiles[tos]['text'])
+        for n in range(len(self.tiles)):
+            if self.tiles[n]['text'] == "wall":
+                visitedTiles.add(n)
+
+        while len(path) != 0:
             if (self.tiles[tos]['text'] == "vacuumDirty"):
+                self.tiles[tos]['text'] = "vacuum"
+                self.dirtTile = -1
+                self.lock = False
                 return path
             else:
+                options = len(self.graph[tos])
                 for n in self.graph[tos]:
                     if n not in visitedTiles:
-                        print(n)
                         path.append(n)
                         visitedTiles.add(n)
                         tos = n
                         self.changeVacuumState(self.VacuumTile, tos)
+                        self.update()
                         time.sleep(1)
                         break
+                    elif n == self.graph[tos][options - 1]:
+                        path.pop()
+                        if len(path) != 0:
+                            tos = path[len(path) - 1]
+                        self.changeVacuumState(self.VacuumTile, tos)
+                        self.update()
+                        time.sleep(1)
+        self.lock = False
+
+    def bfs(self):
+        self.lock = True
+        visitedTiles = set()
+        frontiers = []
+        nextf = []
+
+        for n in range(len(self.tiles)):
+            if self.tiles[n]['text'] == "wall":
+                visitedTiles.add(n)
+        visitedTiles.add(self.VacuumTile)
+
+        for n in self.graph[self.VacuumTile]:
+            frontiers.append(n)
+
+        while len(frontiers) > 0:
+            print(frontiers)
+            for i in frontiers:
+                if i not in visitedTiles:
+                    self.changeVacuumState(self.VacuumTile, i)
+                    visitedTiles.add(self.VacuumTile)
+                    self.update()
+                    time.sleep(1)
+                    if (self.tiles[i]['text'] == "vacuumDirty"):
+                        self.tiles[i]['text'] = "vacuum"
+                        self.dirtTile = -1
+                        self.lock = False
+                        print("here")
+                        return
+                    for n in self.graph[i]:
+                        if n not in visitedTiles and n not in nextf:
+                            nextf.append(n)
+            frontiers = nextf[:]
+            nextf.clear()
+        self.lock = False
 
     def changeVacuumState(self, old, new):
         if self.tiles[new]['text'] == "dirty":

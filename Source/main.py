@@ -24,6 +24,7 @@ tileWindow = TileFrame.Tiles(body, navbar)
 tileWindow.grid(row=0, column=0, sticky="news", padx=PADDING, pady=PADDING)
 # ==================================================
 
-tileWindow.dfs()
+navbar.mainWindow(tileWindow)
+
 
 window.mainloop()

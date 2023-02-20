@@ -7,8 +7,10 @@ class NavbarFrame(Frame):
         Frame.__init__(self, parent)
 
         self.configure(bg="#222831")
-        self.rowconfigure(tuple(range(10)), weight=1)
+        self.rowconfigure(tuple(range(12)), weight=1)
         self.columnconfigure(0, weight=1)
+
+        self.controlledWindow = TileFrame.Tiles
 
         # Tool Menu===============================================
         self.options_list = ["Clean/Dirty tool", "Wall tool", "Vacuum tool"]
@@ -24,10 +26,24 @@ class NavbarFrame(Frame):
         self.cursorMode = "Null"
         # ========================================================
 
+        # algorithm  Menu ===============================================
+        self.options_list = ["Depth First", "Breadth First"]
+        self.value_inside = StringVar(self)
+        self.value_inside.set("Algorithm")
+
+        self.toolMenu = OptionMenu(self, self.value_inside, *
+                                   self.options_list, command=self.setAlgorithm)
+        self.toolMenu.configure(font=('Calisto MT', 18),
+                                bg="#222831", fg="white", border=0, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
+        self.toolMenu.grid(row=1, column=0, sticky=E+W, padx=10)
+
+        self.algorithm = "Null"
+        # ========================================================
+
         # Start Button===========================================
         self.startButton = Button(self, text="Start",
                                   font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15, command=self.startAlgorithm)
-        self.startButton.grid(row=10, column=0, sticky=E+W, padx=10, pady=10)
+        self.startButton.grid(row=12, column=0, sticky=E+W, padx=10, pady=10)
 
         self.start = False
         # =======================================================
@@ -38,8 +54,14 @@ class NavbarFrame(Frame):
     def setCursorMode(self, value):
         self.cursorMode = value
 
-    def startAlgorithm(self):
-        self.start = True
+    def setAlgorithm(self, value):
+        self.algorithm = value
 
-    def getStart(self):
-        return self.start
+    def startAlgorithm(self):
+        if self.algorithm == "Depth First":
+            self.controlledWindow.dfs()
+        elif self.algorithm == "Breadth First":
+            self.controlledWindow.bfs()
+
+    def mainWindow(self, controlled):
+        self.controlledWindow = controlled
