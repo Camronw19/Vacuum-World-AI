@@ -7,8 +7,8 @@ class NavbarFrame(Frame):
         Frame.__init__(self, parent)
 
         self.configure(bg="#222831")
-        self.rowconfigure(tuple(range(12)), weight=1)
-        self.columnconfigure(0, weight=1)
+        self.rowconfigure(tuple(range(20)), weight=1)
+        self.columnconfigure(2, weight=1)
 
         self.controlledWindow = TileFrame.Tiles
 
@@ -20,7 +20,7 @@ class NavbarFrame(Frame):
         self.toolMenu = OptionMenu(self, self.value_inside, *
                                    self.options_list, command=self.setCursorMode)
         self.toolMenu.configure(font=('Calisto MT', 18),
-                                bg="#222831", fg="white", border=0, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
+                                bg="#222831", fg="white", border=0, width=15, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
         self.toolMenu.grid(row=0, column=0, sticky=E+W, padx=10)
 
         self.cursorMode = "Null"
@@ -34,16 +34,24 @@ class NavbarFrame(Frame):
         self.toolMenu = OptionMenu(self, self.value_inside, *
                                    self.options_list, command=self.setAlgorithm)
         self.toolMenu.configure(font=('Calisto MT', 18),
-                                bg="#222831", fg="white", border=0, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
-        self.toolMenu.grid(row=1, column=0, sticky=E+W, padx=10)
+                                bg="#222831", fg="white", border=0, width=15, highlightthickness=1, highlightbackground="#BBBFCA", activebackground="#393E46", activeforeground="white")
+        self.toolMenu.grid(row=2, column=0, sticky=E+W, padx=10)
 
         self.algorithm = "Null"
         # ========================================================
 
         # Start Button===========================================
         self.startButton = Button(self, text="Start",
-                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15, command=self.startAlgorithm)
-        self.startButton.grid(row=12, column=0, sticky=E+W, padx=10, pady=10)
+                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black", width=15,  command=self.startAlgorithm)
+        self.startButton.grid(row=18, column=0, sticky=E+W+N+S,
+                              padx=10, pady=10, columnspan=3)
+
+        self.start = False
+        # =======================================================
+        # Reset Button===========================================
+        self.resetButton = Button(self, text="Reset",
+                                  font=('Calisto MT', 18), fg="black", bg="#BBBFCA", activebackground="#BBBFCA", activeforeground="black",  command=self.resetTiles)
+        self.resetButton.grid(row=17, column=0, sticky=W,  padx=10, pady=10)
 
         self.start = False
         # =======================================================
@@ -65,3 +73,6 @@ class NavbarFrame(Frame):
 
     def mainWindow(self, controlled):
         self.controlledWindow = controlled
+
+    def resetTiles(self):
+        self.controlledWindow.resetVisitedTiles()

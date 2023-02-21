@@ -8,7 +8,9 @@ PADDING = 3
 
 window = tk.Tk()
 window.geometry("650x400")
+window.resizable(False, False)
 window.configure(bg="black")
+window.title("Vacuum World")
 
 # navbar frame======================================
 navbar = Navbar.NavbarFrame(window)

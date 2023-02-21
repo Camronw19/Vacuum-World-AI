@@ -2,6 +2,7 @@ from tkinter import *
 from enum import Enum
 from collections import defaultdict
 import time
+import random
 
 
 class CursorMode(Enum):
@@ -15,10 +16,9 @@ class Tiles(Frame):
     def __init__(self, parent, control):
         Frame.__init__(self, parent)
 
-        self.ROWS = 3
-        self.COLS = 3
-        self.graph = defaultdict(list)
-
+        self.ROWS = 4
+        self.COLS = 4
+        self.ANIMATIONSPEED = 6/10
         self.columnconfigure(tuple(range(self.ROWS)), weight=1)
         self.rowconfigure(tuple(range(self.COLS)), weight=1)
 
@@ -28,6 +28,8 @@ class Tiles(Frame):
         self.lock = False
         self.VacuumTile = 0
         self.dirtTile = 7
+        self.visitedTiles = []
+
         # Assets============================================
         self.Tile_Clean = PhotoImage(
             file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\TileClean.png")
@@ -39,6 +41,8 @@ class Tiles(Frame):
             file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\VaccumDirty.png")
         self.Wall = PhotoImage(
             file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\Wall.png")
+        self.Tile_Visited = PhotoImage(
+            file=r"C:\Users\camro\Documents\Development\Python Projects\Vacuum World\Assets\TileVisited.png")
         # ===================================================
 
         # Generate Tiles=====================================
@@ -49,7 +53,6 @@ class Tiles(Frame):
                 self.tiles.append(
                     Button(self,  image=self.Tile_Clean, text="clean", font=('Arial', 18),  bg="#eeeee4", borderwidth=1, command=lambda x=i: self.changeTileState(x)))
                 self.tiles[i].grid(column=y, row=x, sticky="news")
-                self.tiles[i].image = self.Tile_Clean
                 i += 1
         self.tiles[self.VacuumTile]['image'] = self.Vacuum_Clean
         self.tiles[self.VacuumTile]['text'] = "vacuum"
@@ -59,39 +62,8 @@ class Tiles(Frame):
         # ====================================================
 
         # generate search graph================================
-        self.addEdge(self.graph, 0, 1)
-        self.addEdge(self.graph, 0, 3)
-
-        self.addEdge(self.graph, 1, 0)
-        self.addEdge(self.graph, 1, 2)
-        self.addEdge(self.graph, 1, 4)
-
-        self.addEdge(self.graph, 2, 1)
-        self.addEdge(self.graph, 2, 5)
-
-        self.addEdge(self.graph, 3, 0)
-        self.addEdge(self.graph, 3, 4)
-        self.addEdge(self.graph, 3, 6)
-
-        self.addEdge(self.graph, 4, 1)
-        self.addEdge(self.graph, 4, 3)
-        self.addEdge(self.graph, 4, 5)
-        self.addEdge(self.graph, 4, 7)
-
-        self.addEdge(self.graph, 5, 2)
-        self.addEdge(self.graph, 5, 4)
-        self.addEdge(self.graph, 5, 8)
-
-        self.addEdge(self.graph, 6, 3)
-        self.addEdge(self.graph, 6, 7)
-
-        self.addEdge(self.graph, 7, 4)
-        self.addEdge(self.graph, 7, 6)
-        self.addEdge(self.graph, 7, 8)
-
-        self.addEdge(self.graph, 8, 5)
-        self.addEdge(self.graph, 8, 7)
-
+        self.graph = defaultdict(list)
+        self.initializeGraph(self.graph, self.ROWS, self.COLS)
         # =====================================================
 
     def setCursorMode(self):
@@ -127,7 +99,7 @@ class Tiles(Frame):
                 if (self.tiles[i]['text'] != "wall" and self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "dirty"):
                     self.tiles[i]['text'] = "wall"
                     self.tiles[i]['image'] = self.Wall
-                elif (self.tiles[i]['text'] != "vacuum"):
+                elif (self.tiles[i]['text'] != "vacuum" and self.tiles[i]['text'] != "dirty"):
                     self.tiles[i]['text'] = "clean"
                     self.tiles[i]['image'] = self.Tile_Clean
 
@@ -158,7 +130,7 @@ class Tiles(Frame):
                         tos = n
                         self.changeVacuumState(self.VacuumTile, tos)
                         self.update()
-                        time.sleep(1)
+                        time.sleep(self.ANIMATIONSPEED)
                         break
                     elif n == self.graph[tos][options - 1]:
                         path.pop()
@@ -166,7 +138,7 @@ class Tiles(Frame):
                             tos = path[len(path) - 1]
                         self.changeVacuumState(self.VacuumTile, tos)
                         self.update()
-                        time.sleep(1)
+                        time.sleep(self.ANIMATIONSPEED)
         self.lock = False
 
     def bfs(self):
@@ -190,7 +162,7 @@ class Tiles(Frame):
                     self.changeVacuumState(self.VacuumTile, i)
                     visitedTiles.add(self.VacuumTile)
                     self.update()
-                    time.sleep(1)
+                    time.sleep(self.ANIMATIONSPEED)
                     if (self.tiles[i]['text'] == "vacuumDirty"):
                         self.tiles[i]['text'] = "vacuum"
                         self.dirtTile = -1
@@ -206,31 +178,73 @@ class Tiles(Frame):
 
     def changeVacuumState(self, old, new):
         if self.tiles[new]['text'] == "dirty":
-            self.tiles[old]['image'] = self.Tile_Clean
+            self.tiles[old]['image'] = self.Tile_Visited
             self.tiles[old]['text'] = 'clean'
             self.tiles[new]['image'] = self.Vacuum_Clean
             self.tiles[new]['text'] = 'vacuumDirty'
             self.VacuumTile = new
+            self.visitedTiles.append(old)
         else:
-            self.tiles[old]['image'] = self.Tile_Clean
+            self.tiles[old]['image'] = self.Tile_Visited
             self.tiles[old]['text'] = 'clean'
             self.tiles[new]['image'] = self.Vacuum_Clean
             self.tiles[new]['text'] = 'vacuum'
             self.VacuumTile = new
+            self.visitedTiles.append(old)
 
-    def addEdge(self, graph, u, v):
-        graph[u].append(v)
+    def initializeGraph(self, graph, ROWS, COLS):
+        i = 0
+        for r in range(0, ROWS):
+            for c in range(0, COLS):
+                if r > 0 and r < ROWS - 1 and c > 0 and c < COLS - 1:  # middle tiles
+                    graph[i].append(i - 1)
+                    graph[i].append(i + 1)
+                    graph[i].append(i - COLS)
+                    graph[i].append(i + COLS)
+                elif r == 0 and c == 0:  # top left corner
+                    graph[i].append(i + 1)
+                    graph[i].append(i + COLS)
+                elif r == 0 and c == COLS - 1:  # top right corner
+                    graph[i].append(i - 1)
+                    graph[i].append(i + COLS)
+                elif r == 0:  # top row
+                    graph[i].append(i - 1)
+                    graph[i].append(i + 1)
+                    graph[i].append(i + COLS)
+                elif r == ROWS - 1 and c == 0:  # bottom left corner
+                    graph[i].append(i - COLS)
+                    graph[i].append(i + 1)
+                elif r == ROWS - 1 and c == COLS - 1:  # bottom right corner
+                    graph[i].append(i - COLS)
+                    graph[i].append(i - 1)
+                elif r == ROWS - 1:  # bottom row
+                    graph[i].append(i - 1)
+                    graph[i].append(i + 1)
+                    graph[i].append(i - COLS)
+                elif c == 0:  # left col
+                    graph[i].append(i + 1)
+                    graph[i].append(i - COLS)
+                    graph[i].append(i + COLS)
+                elif c == COLS - 1:  # right col
+                    graph[i].append(i - 1)
+                    graph[i].append(i - COLS)
+                    graph[i].append(i + COLS)
+                i += 1
+        for n in range(len(graph)):
+            graph[n].sort()
 
-    # definition of function
-    def generate_edges(graph):
-        edges = []
+    def resetVisitedTiles(self):
+        if self.lock == False:
+            for t in self.visitedTiles:
+                if self.tiles[t]['text'] != "vacuum":
+                    self.tiles[t]['image'] = self.Tile_Clean
+            self.visitedTiles.clear()
 
-        # for each node in graph
-        for node in graph:
-
-            # for each neighbour node of a single node
-            for neighbour in graph[node]:
-
-                # if edge exists then append
-                edges.append((node, neighbour))
-        return edges
+            dirtyTileSet = False
+            while dirtyTileSet == False and self.dirtTile == -1:
+                x = random.randint(0, (self.ROWS * self.COLS) - 1)
+                if self.tiles[x]['text'] != "vacuum" and self.tiles[x]['text'] != "wall":
+                    self.tiles[x]['text'] = "dirty"
+                    self.tiles[x]['image'] = self.Tile_Dirty
+                    self.dirtTile = x
+                    dirtyTileSet = True
