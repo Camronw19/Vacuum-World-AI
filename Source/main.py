@@ -7,8 +7,10 @@ PADDING = 3
 # ===================================================
 
 window = tk.Tk()
-window.geometry("1600x700")
+window.geometry("650x400")
+window.resizable(False, False)
 window.configure(bg="black")
+window.title("Vacuum World")
 
 # navbar frame======================================
 navbar = Navbar.NavbarFrame(window)
@@ -23,6 +25,8 @@ body.pack(side="right", fill="both", expand="true")
 tileWindow = TileFrame.Tiles(body, navbar)
 tileWindow.grid(row=0, column=0, sticky="news", padx=PADDING, pady=PADDING)
 # ==================================================
+
+navbar.mainWindow(tileWindow)
 
 
 window.mainloop()
